@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -92,3 +93,46 @@ func LoadConfig() (*Config, error) {
 
 	return &cfg, nil
 }
+
+// FindNode searches nodes.yaml for a node with the specified name
+func FindNode(name string) (*Node, error) {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, node := range cfg.Nodes {
+		if node.Name == name {
+			return &node, nil
+		}
+	}
+
+	return nil, fmt.Errorf("node %q not found in nodes.yaml config", name)
+}
+
+// GetNodePrivateKeyPath locates the SSH private key for a given node.
+// It checks ~/.pistore/keys/_ed25519/<nodeName>. If that is missing, it falls back to
+// ~/.pistore/keys/_ed25519/id_ed25519. If neither exists, it returns an error.
+func GetNodePrivateKeyPath(nodeName string) (string, error) {
+	dir, err := GetPistoreDir()
+	if err != nil {
+		return "", err
+	}
+
+	keysDir := filepath.Join(dir, "keys", "_ed25519")
+
+	// 1. Check node-specific key
+	nodeKeyPath := filepath.Join(keysDir, nodeName)
+	if _, err := os.Stat(nodeKeyPath); err == nil {
+		return nodeKeyPath, nil
+	}
+
+	// 2. Check fallback generic key
+	fallbackKeyPath := filepath.Join(keysDir, "id_ed25519")
+	if _, err := os.Stat(fallbackKeyPath); err == nil {
+		return fallbackKeyPath, nil
+	}
+
+	return "", fmt.Errorf("no SSH private key found for node %q (checked %s and %s)", nodeName, nodeKeyPath, fallbackKeyPath)
+}
+

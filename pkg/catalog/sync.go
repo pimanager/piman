@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/sameerchandra/piman/pkg/config"
@@ -36,11 +37,52 @@ func SyncCatalog(repoURL string) (string, error) {
 		return "", fmt.Errorf("failed to inspect catalog cache directory: %w", err)
 	}
 
-	// Repository exists, open and pull
+	// Repository exists, open it
 	fmt.Printf("Opening local catalog cache at %s...\n", cacheDir)
 	repo, err := git.PlainOpen(cacheDir)
 	if err != nil {
-		return "", fmt.Errorf("failed to open local catalog: %w", err)
+		// If opening fails (e.g. cache is corrupted), clean and re-clone
+		fmt.Printf("Failed to open local catalog cache, recreating: %v\n", err)
+		if err := os.RemoveAll(cacheDir); err != nil {
+			return "", fmt.Errorf("failed to clean up corrupted catalog cache: %w", err)
+		}
+		fmt.Printf("Cloning catalog from %s into %s...\n", repoURL, cacheDir)
+		_, err = git.PlainClone(cacheDir, false, &git.CloneOptions{
+			URL:      repoURL,
+			Progress: os.Stdout,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to clone catalog: %w", err)
+		}
+		return cacheDir, nil
+	}
+
+	// Verify that the remote URL matches the requested repoURL
+	hasMatchingRemote := false
+	remote, err := repo.Remote("origin")
+	if err == nil && remote != nil {
+		for _, url := range remote.Config().URLs {
+			if isSameGitURL(url, repoURL) {
+				hasMatchingRemote = true
+				break
+			}
+		}
+	}
+
+	if !hasMatchingRemote {
+		fmt.Printf("Cached catalog remote URL does not match %s. Re-cloning...\n", repoURL)
+		if err := os.RemoveAll(cacheDir); err != nil {
+			return "", fmt.Errorf("failed to clean up outdated catalog cache: %w", err)
+		}
+		fmt.Printf("Cloning catalog from %s into %s...\n", repoURL, cacheDir)
+		_, err = git.PlainClone(cacheDir, false, &git.CloneOptions{
+			URL:      repoURL,
+			Progress: os.Stdout,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to clone catalog: %w", err)
+		}
+		return cacheDir, nil
 	}
 
 	wt, err := repo.Worktree()
@@ -64,3 +106,14 @@ func SyncCatalog(repoURL string) (string, error) {
 	fmt.Println("Catalog synchronized successfully.")
 	return cacheDir, nil
 }
+
+func isSameGitURL(url1, url2 string) bool {
+	clean := func(u string) string {
+		u = strings.TrimSpace(u)
+		u = strings.TrimSuffix(u, "/")
+		u = strings.TrimSuffix(u, ".git")
+		return strings.ToLower(u)
+	}
+	return clean(url1) == clean(url2)
+}
+
