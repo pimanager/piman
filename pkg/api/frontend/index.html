@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>piStore Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Left Sidebar (Notion style) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <i data-lucide="folder" class="sidebar-icon"></i>
+        <span class="sidebar-title">piStore Workspace</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="nodes"><i data-lucide="server"></i> Cluster Nodes</a>
+        <a href="#" class="nav-item" data-tab="catalog"><i data-lucide="package"></i> App Catalog</a>
+        <a href="#" class="nav-item" data-tab="monitor"><i data-lucide="activity"></i> Service Monitor</a>
+        <a href="#" class="nav-item" data-tab="settings"><i data-lucide="settings"></i> Settings & Sync</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="status-dot online"></span> API Server Connected
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Page: Nodes Manager -->
+      <section id="tab-nodes" class="tab-content">
+        <div class="page-header">
+          <h1><i data-lucide="server" class="header-icon"></i> Cluster Nodes</h1>
+          <p class="section-desc">Manage connection targets and provision SSH credentials in your Raspberry Pi cluster.</p>
+        </div>
+
+        <div class="split-layout">
+          <div class="pane-left">
+            <h3 class="pane-title">Registered Nodes</h3>
+            <div id="nodes-list" class="nodes-list-container">
+              <div class="loading-spinner">Loading nodes...</div>
+            </div>
+          </div>
+
+          <div class="pane-right">
+            <div id="node-actions-area" class="notion-card node-config-card hidden">
+              <h3 id="selected-node-name">Configure Node</h3>
+              <p class="help-text">Provision SSH keys to authorize remote Docker Compose commands.</p>
+              
+              <div class="action-btn-group">
+                <button id="btn-action-keygen" class="btn btn-secondary">Generate SSH Key</button>
+                <button id="btn-action-bootstrap" class="btn btn-secondary">Bootstrap Key</button>
+              </div>
+              
+              <!-- Bootstrap Password Form -->
+              <div id="bootstrap-form" class="bootstrap-form hidden">
+                <div class="form-group">
+                  <label for="node-ssh-password">Remote SSH Password</label>
+                  <input type="password" id="node-ssh-password" placeholder="Enter password to copy key...">
+                </div>
+                <button id="btn-submit-bootstrap" class="btn btn-primary">Authenticate & Install</button>
+              </div>
+              
+              <div id="node-actions-status" class="status-msg"></div>
+            </div>
+            
+            <div id="node-actions-placeholder" class="notion-card placeholder-card">
+              <i data-lucide="mouse-pointer" class="lucide-big"></i>
+              <p>Select a node from the list to configure key authorization.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: Catalog -->
+      <section id="tab-catalog" class="tab-content hidden">
+        <div class="page-header header-with-action">
+          <div>
+            <h1><i data-lucide="package" class="header-icon"></i> App Catalog</h1>
+            <p class="section-desc">Deploy home server applications onto your cluster with one click.</p>
+          </div>
+          <button id="btn-refresh-catalog" class="btn btn-secondary btn-small">Refresh Catalog</button>
+        </div>
+
+        <div id="catalog-grid" class="catalog-grid">
+          <div class="loading-spinner">Loading catalog apps...</div>
+        </div>
+      </section>
+
+      <!-- Page: Service Monitor -->
+      <section id="tab-monitor" class="tab-content hidden">
+        <div class="page-header header-with-action">
+          <div>
+            <h1><i data-lucide="activity" class="header-icon"></i> Service Monitor</h1>
+            <p class="section-desc">Inspect active running containers and check service health on target nodes.</p>
+          </div>
+          <div class="select-wrapper">
+            <select id="monitor-node-select" class="select-node">
+              <option value="">-- Select Node to Inspect --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="split-layout">
+          <!-- Live Status Dashboard -->
+          <div class="pane-left">
+            <h3 class="pane-title">Container Statuses</h3>
+            <div id="health-dashboard" class="health-dashboard">
+              <div class="placeholder-card notion-card">
+                <i data-lucide="activity" class="lucide-big"></i>
+                <p>Please select a node above to inspect active docker containers.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Console Terminal Logs -->
+          <div class="pane-right">
+            <div class="notion-card console-card">
+              <div class="console-header">
+                <h3 class="pane-title">Deployment Console Logs</h3>
+                <button id="btn-clear-console" class="btn-text">Clear Logs</button>
+              </div>
+              <div id="terminal-console" class="terminal-console">
+                <div class="console-line system">Console initialized. Ready for operations...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: Settings -->
+      <section id="tab-settings" class="tab-content hidden">
+        <div class="page-header">
+          <h1><i data-lucide="settings" class="header-icon"></i> Settings & Sync</h1>
+          <p class="section-desc">Configure the application catalog Git source repository.</p>
+        </div>
+
+        <div class="notion-card form-card">
+          <h3 class="pane-title">Catalog Source Repository</h3>
+          <div class="form-group">
+            <label for="sync-repo-url">Git Repository URL</label>
+            <input type="text" id="sync-repo-url" placeholder="https://github.com/org/catalog.git" value="https://github.com/sameerchandra/piman.git">
+          </div>
+          <button id="btn-sync" class="btn btn-primary" style="width: auto;">Sync Repository</button>
+          <div id="sync-status-msg" class="status-msg"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Deploy Modal -->
+    <div id="deploy-modal" class="modal-overlay hidden">
+      <div class="modal-content notion-card">
+        <h3>Deploy Application</h3>
+        <p id="deploy-modal-app-info" class="help-text"></p>
+        
+        <div class="form-group">
+          <label for="deploy-node-select">Target Node</label>
+          <select id="deploy-node-select" class="select-node-modal">
+            <!-- Dynamically loaded -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="deploy-compose-path">Docker Compose Path</label>
+          <input type="text" id="deploy-compose-path" readonly>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="btn-modal-submit" class="btn btn-primary">Deploy Now</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

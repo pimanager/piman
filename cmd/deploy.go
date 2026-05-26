@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"os"
 
 	"github.com/sameerchandra/piman/pkg/deploy"
 	"github.com/spf13/cobra"
@@ -23,7 +24,7 @@ var deployCmd = &cobra.Command{
 			return errors.New("compose file path cannot be empty")
 		}
 
-		return deploy.Deploy(nodeName, composePath)
+		return deploy.Deploy(nodeName, composePath, os.Stdout)
 	},
 }
 

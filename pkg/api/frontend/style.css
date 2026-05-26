@@ -1,0 +1,756 @@
+/* Notion Theme Design Tokens */
+:root {
+  --bg-main: #ffffff;
+  --bg-sidebar: #f7f7f5;
+  --border-color: #edece9;
+  --text-main: #37352f;
+  --text-muted: #787774;
+  --bg-hover: #efeee9;
+  
+  --color-primary: #2383e2; /* Notion Blue */
+  --color-primary-hover: #1b66b1;
+  
+  --badge-green-bg: #eaf5ee;
+  --badge-green-text: #0f7b4e;
+  
+  --badge-red-bg: #faebeb;
+  --badge-red-text: #d44037;
+  
+  --badge-orange-bg: #faf1e6;
+  --badge-orange-text: #c16410;
+
+  --console-bg: #191919;
+  --console-border: #2a2a2a;
+  --console-text: #e3e3e2;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Layout */
+.app-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Left Sidebar styling */
+.sidebar {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem 1rem 0.5rem;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.08);
+  margin-bottom: 1rem;
+}
+
+.sidebar-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2px;
+  color: var(--text-main);
+}
+
+.sidebar-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.nav-item.active {
+  background-color: var(--bg-hover);
+  font-weight: 600;
+}
+
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8px;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.nav-item:hover svg, .nav-item.active svg {
+  color: var(--color-primary);
+}
+
+.sidebar-footer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.5rem;
+  border-top: 1px solid rgba(55, 53, 47, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  display: inline-block;
+}
+
+.status-dot.online {
+  background-color: #2ebd60;
+  box-shadow: 0 0 6px rgba(46, 189, 96, 0.4);
+}
+
+/* Main Content Area */
+.main-content {
+  padding: 2.5rem 3rem;
+  overflow-y: auto;
+  background-color: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.5rem;
+}
+
+.section-desc {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Split Pane Layouts */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  flex-grow: 1;
+  min-height: 0;
+}
+
+.pane-left, .pane-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.pane-title {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+/* Notion Cards styling */
+.notion-card {
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(15, 15, 15, 0.05);
+}
+
+.placeholder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+  border-style: dashed;
+  flex: 1;
+}
+
+.header-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2px;
+  vertical-align: -4px;
+  margin-right: 0.5rem;
+  color: var(--text-main);
+}
+
+.lucide-big {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.5px;
+  color: rgba(55, 53, 47, 0.25);
+  margin-bottom: 0.75rem;
+}
+
+.app-card-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8px;
+  vertical-align: -2px;
+  margin-right: 0.4rem;
+  color: var(--text-muted);
+}
+
+.app-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8px;
+  vertical-align: -2px;
+  margin-right: 0.35rem;
+  color: var(--text-muted);
+}
+
+.svc-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.8px;
+  vertical-align: -1px;
+  margin-right: 0.25rem;
+  color: var(--text-muted);
+}
+
+.placeholder-card p {
+  font-size: 0.875rem;
+}
+
+/* Nodes List */
+.nodes-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.node-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.node-item:hover {
+  background-color: var(--bg-sidebar);
+}
+
+.node-item.selected {
+  border-color: var(--color-primary);
+  background-color: rgba(35, 131, 226, 0.03);
+}
+
+.node-info-text h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.node-info-text span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.node-connection-badge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-sidebar);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+/* Node Config Card */
+.node-config-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.help-text {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.action-btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input[type="text"], input[type="password"], select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: var(--text-main);
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(15, 15, 15, 0.05);
+}
+
+input[type="text"]:focus, input[type="password"]:focus, select:focus {
+  border-color: var(--color-primary);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-sidebar);
+}
+
+.btn-small {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+}
+
+/* Status Messages */
+.status-msg {
+  font-size: 0.8125rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  display: none;
+}
+
+.status-msg.error {
+  display: block;
+  background-color: var(--badge-red-bg);
+  color: var(--badge-red-text);
+  border: 1px solid rgba(212, 64, 55, 0.15);
+}
+
+.status-msg.success {
+  display: block;
+  background-color: var(--badge-green-bg);
+  color: var(--badge-green-text);
+  border: 1px solid rgba(15, 123, 78, 0.15);
+}
+
+.status-msg.loading {
+  display: block;
+  background-color: var(--badge-orange-bg);
+  color: var(--badge-orange-text);
+  border: 1px solid rgba(193, 100, 16, 0.15);
+}
+
+/* Catalog Center Grid */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  overflow-y: auto;
+  padding: 0.25rem 0;
+}
+
+.app-card {
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(15, 15, 15, 0.05);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.app-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 15, 15, 0.08);
+}
+
+.app-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.app-card-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.75rem;
+}
+
+.app-card-meta span {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.btn-deploy {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Monitor dashboard list */
+.health-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.health-dashboard h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.health-dashboard h3:first-child {
+  margin-top: 0;
+}
+
+.monitor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.monitor-item {
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+.monitor-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-status-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.app-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.app-status-badge.healthy {
+  background-color: var(--badge-green-bg);
+  color: var(--badge-green-text);
+}
+
+.app-status-badge.degraded {
+  background-color: var(--badge-orange-bg);
+  color: var(--badge-orange-text);
+}
+
+.app-status-badge.stopped {
+  background-color: var(--badge-red-bg);
+  color: var(--badge-red-text);
+}
+
+.services-list {
+  margin-top: 0.5rem;
+  border-top: 1px dotted var(--border-color);
+  padding-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.service-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.service-name {
+  color: var(--text-muted);
+}
+
+.service-status {
+  font-weight: 600;
+}
+
+.service-status.running {
+  color: var(--badge-green-text);
+}
+
+.service-status.exited, .service-status.missing {
+  color: var(--badge-red-text);
+}
+
+/* Console logs card styling */
+.console-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.btn-text {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+.terminal-console {
+  background-color: var(--console-bg);
+  border: 1px solid var(--console-border);
+  color: var(--console-text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.console-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-line.system {
+  color: #38bdf8;
+}
+
+.console-line.success {
+  color: #4ade80;
+}
+
+.console-line.error {
+  color: #f87171;
+}
+
+.console-line.log {
+  color: var(--console-text);
+}
+
+/* Modal overlays */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 15, 15, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 440px;
+  padding: 2rem;
+  box-shadow: 0 15px 30px rgba(15, 15, 15, 0.2);
+}
+
+.modal-content h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.select-node-modal {
+  background-color: #ffffff;
+}
+
+/* Settings Form Card */
+.form-card {
+  max-width: 600px;
+}
+
+.form-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Loading/Helpers */
+.hidden {
+  display: none !important;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(55, 53, 47, 0.08);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(55, 53, 47, 0.16);
+}

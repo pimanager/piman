@@ -1,0 +1,6 @@
+# Compiled binary
+piman
+
+# Runtime / Local state directories
+catalog/
+state/

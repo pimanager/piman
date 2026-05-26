@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 // Deploy runs `docker compose up -d` against the remote worker node using the specified docker-compose file.
 // It maps the target node, resolves its SSH key, builds a temporary SSH wrapper script to inject the key,
 // and runs the compose command with the DOCKER_HOST environment variable set.
-func Deploy(nodeName string, composeFilePath string) error {
+func Deploy(nodeName string, composeFilePath string, output io.Writer) error {
 	// 1. Resolve Node info
 	node, err := config.FindNode(nodeName)
 	if err != nil {
@@ -55,8 +56,8 @@ exec "%s" -4 -i "%s" -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKn
 
 	// 7. Configure command environment
 	cmd := exec.Command("docker", "compose", "-f", composeFilePath, "up", "-d")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = output
+	cmd.Stderr = output
 
 	// Modify PATH to prepend the temp directory containing our 'ssh' wrapper
 	originalPath := os.Getenv("PATH")
