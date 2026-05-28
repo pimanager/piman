@@ -4,3 +4,4 @@ piman
 # Runtime / Local state directories
 catalog/
 state/
+.DS_Store

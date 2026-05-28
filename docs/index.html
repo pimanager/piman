@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>piMan — Lightweight Raspberry Pi Cluster Orchestrator</title>
+  <!-- Modern Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-main: #09090b;
+      --card-bg: rgba(24, 24, 27, 0.6);
+      --border-color: rgba(63, 63, 70, 0.4);
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --primary: #3b82f6; /* Modern Blue */
+      --primary-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --command-text-color: #e4e4e7;
+      --badge-bg: rgba(59, 130, 246, 0.1);
+      --badge-border: rgba(59, 130, 246, 0.2);
+      --feature-icon-bg: rgba(59, 130, 246, 0.1);
+      --feature-hover-border: rgba(59, 130, 246, 0.3);
+      
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+    }
+
+    :root.light {
+      --bg-main: #fbfbfa;
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --border-color: rgba(228, 228, 231, 0.9);
+      --text-main: #1f1f1f;
+      --text-muted: #787774;
+      --primary: #2383e2; /* Notion Blue */
+      --primary-hover: #1b66b1;
+      --accent-glow: rgba(35, 131, 226, 0.08);
+      --command-text-color: #1f1f1f;
+      --badge-bg: rgba(35, 131, 226, 0.1);
+      --badge-border: rgba(35, 131, 226, 0.2);
+      --feature-icon-bg: rgba(35, 131, 226, 0.1);
+      --feature-hover-border: rgba(35, 131, 226, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    :root.light .theme-toggle-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    :root.light h1 {
+      background: linear-gradient(180deg, #1f1f1f 0%, #787774 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Ambient Background Glows */
+    .glow-overlay {
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Navbar */
+    header {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      color: var(--primary);
+    }
+
+    .github-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .github-btn:hover {
+      color: var(--text-main);
+    }
+
+    /* Hero Section */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+      z-index: 10;
+    }
+
+    .hero-container {
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .badge-premium {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--badge-bg);
+      color: var(--primary);
+      border: 1px solid var(--badge-border);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.25rem; }
+    }
+
+    .lead {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto 2.5rem auto;
+      line-height: 1.6;
+    }
+
+    /* Get Started & Command Row (Matches User Image mock) */
+    .installer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 4rem;
+    }
+
+    .btn-get-started {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--text-main);
+      color: var(--bg-main);
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s, opacity 0.2s;
+    }
+
+    .btn-get-started:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-get-started:active {
+      transform: translateY(0);
+    }
+
+    .command-box {
+      display: flex;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem 1.25rem;
+      gap: 1rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .command-text {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--command-text-color);
+      letter-spacing: -0.01em;
+      user-select: all;
+    }
+
+    .btn-copy {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+
+    .btn-copy:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    :root.light .btn-copy:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Core Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .feature-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--feature-hover-border);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon-wrapper {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background-color: var(--feature-icon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border-color);
+      z-index: 10;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    footer a:hover {
+      color: var(--text-main);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Inline script to prevent theme flash
+    (function() {
+      const savedTheme = localStorage.getItem('piman-theme');
+      const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
+
+  <div class="glow-overlay"></div>
+
+  <!-- Navbar -->
+  <header>
+    <div class="brand">
+      <i data-lucide="folder" class="brand-icon"></i>
+      <span>piMan</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+        <i data-lucide="sun" id="theme-icon" style="width: 18px; height: 18px; stroke-width: 2px;"></i>
+      </button>
+      <a href="https://github.com/pimanager/piman" class="github-btn" target="_blank">
+        <i data-lucide="github"></i>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Content -->
+  <main>
+    <div class="hero-container">
+      <div class="badge-premium">Homeserver Orchestrator</div>
+      <h1>Lightweight Raspberry Pi & Linux Cluster Manager</h1>
+      <p class="lead">Deploy homeserver apps, customize ports, and auto-route domains through a secure, self-hosted Nginx reverse proxy.</p>
+
+      <!-- Get Started & Install Command (Matches Mock Image) -->
+      <div class="installer-row">
+        <a href="#features" class="btn-get-started">
+          <span>Get Started</span>
+          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </a>
+        <div class="command-box">
+          <!-- Dynamically generates URL based on current host domain -->
+          <span class="command-text" id="install-cmd">curl -fsSL https://pimanager.github.io/piman/install.sh | bash</span>
+          <button class="btn-copy" id="btn-copy-cmd" title="Copy to Clipboard">
+            <i data-lucide="copy" id="copy-icon" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Core Features Grid -->
+      <div class="features-grid" id="features">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="server" style="width: 20px; height: 20px;"></i></div>
+          <h3>Multi-Node Cluster</h3>
+          <p>Orchestrate workloads across a cluster of Raspberry Pis or local servers over secure SSH connections.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="shuffle" style="width: 20px; height: 20px;"></i></div>
+          <h3>Dynamic Port Overrides</h3>
+          <p>Customize host port mappings before deployment dynamically, avoiding port collision across services.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="globe" style="width: 20px; height: 20px;"></i></div>
+          <h3>Inbound Domain Router</h3>
+          <p>Managed Nginx proxy auto-discovers active services and maps custom domains to your cluster workloads.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper"><i data-lucide="activity" style="width: 20px; height: 20px;"></i></div>
+          <h3>Web Console Manager</h3>
+          <p>Manage configurations, SSH credentials bootstrap, catalog synchronization, and health logs visually.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>Released under the MIT License. Built for Raspberry Pi & Linux clusters.</p>
+  </footer>
+
+  <script>
+    // Initialize Theme Toggle Icon and Handler
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (document.documentElement.classList.contains('light')) {
+      themeIcon.setAttribute('data-lucide', 'moon');
+    } else {
+      themeIcon.setAttribute('data-lucide', 'sun');
+    }
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    themeToggle.addEventListener('click', () => {
+      const isCurrentlyLight = document.documentElement.classList.toggle('light');
+      if (isCurrentlyLight) {
+        localStorage.setItem('piman-theme', 'light');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      } else {
+        localStorage.setItem('piman-theme', 'dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      }
+      lucide.createIcons();
+    });
+
+    // Dynamically adjust setup script URL based on GitHub Pages domain
+    const installCmd = document.getElementById('install-cmd');
+    const currentOrigin = window.location.origin;
+    const currentPath = window.location.pathname;
+    
+    // Default fallback
+    let scriptURL = "https://pimanager.github.io/piman/install.sh";
+    
+    if (window.location.hostname && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1")) {
+      // Build clean URL matching the GitHub Pages deployment path
+      const cleanPath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+      scriptURL = `${currentOrigin}${cleanPath}install.sh`;
+    }
+    installCmd.textContent = `curl -fsSL ${scriptURL} | bash`;
+
+    // Copy to Clipboard Action
+    const btnCopy = document.getElementById('btn-copy-cmd');
+    const copyIcon = document.getElementById('copy-icon');
+
+    btnCopy.addEventListener('click', () => {
+      const textToCopy = installCmd.textContent;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        // Change icon to checkmark with micro-animation
+        copyIcon.setAttribute('data-lucide', 'check');
+        copyIcon.style.color = '#4ade80'; // Success green
+        lucide.createIcons();
+
+        // Revert back after 2 seconds
+        setTimeout(() => {
+          copyIcon.setAttribute('data-lucide', 'copy');
+          copyIcon.style.color = '';
+          lucide.createIcons();
+        }, 2000);
+      }).catch(err => {
+        console.error('Could not copy command: ', err);
+      });
+    });
+  </script>
+</body>
+</html>

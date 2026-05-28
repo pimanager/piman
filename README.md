@@ -32,13 +32,15 @@ graph TD
 
 ## Installation & Setup
 
-### 1. Prerequisites
-* **Go**: Version 1.25 or higher.
-* **Docker & Docker Compose**: Installed on the target worker nodes.
-* **SSH Server**: Enabled on target worker nodes.
+### 1. Quick Install (Recommended)
+You can install `piMan` instantly on any Linux or Raspberry Pi machine using our interactive installer:
+```bash
+curl -fsSL https://pimanager.github.io/piman/install.sh | bash
+```
+The script automatically detects your platform and CPU architecture, downloads the latest pre-compiled release binary, initializes configuration folders, and prompts you if you intend to install the web management server as a background service (`systemd`).
 
-### 2. Build the Application
-Clone the repository and compile the single binary:
+### 2. Manual Build from Source
+Cloning and compiling the single binary locally:
 ```bash
 git clone https://github.com/sameerchandra/piman.git
 cd piman
