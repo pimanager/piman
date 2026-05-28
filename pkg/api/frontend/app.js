@@ -37,6 +37,21 @@ const btnModalCancel = document.getElementById('btn-modal-cancel');
 const btnModalSubmit = document.getElementById('btn-modal-submit');
 let appToDeploy = null;
 
+// Router Elements
+const routerStatusIndicator = document.getElementById('router-status-indicator');
+const routerStatusText = document.getElementById('router-status-text');
+const btnRouterStart = document.getElementById('btn-router-start');
+const btnRouterStop = document.getElementById('btn-router-stop');
+const btnRouterReload = document.getElementById('btn-router-reload');
+const routerControlStatus = document.getElementById('router-control-status');
+
+const routeDomainInput = document.getElementById('route-domain');
+const routeNodeSelect = document.getElementById('route-node');
+const routePortInput = document.getElementById('route-port');
+const btnAddRoute = document.getElementById('btn-add-route');
+const routeCreateStatus = document.getElementById('route-create-status');
+const routesListBody = document.getElementById('routes-list-body');
+
 // Initialize on Load
 window.addEventListener('DOMContentLoaded', () => {
   fetchNodes();
@@ -68,6 +83,9 @@ function setupTabNavigation() {
         fetchNodes();
       } else if (tabName === 'catalog') {
         fetchCatalog();
+      } else if (tabName === 'router') {
+        fetchRouterStatus();
+        fetchRouterRoutes();
       }
     });
   });
@@ -120,6 +138,12 @@ function setupEventListeners() {
 
   // Modal Deploy Submit
   btnModalSubmit.addEventListener('click', handleDeploySubmit);
+
+  // Router Controls
+  btnRouterStart.addEventListener('click', handleRouterStart);
+  btnRouterStop.addEventListener('click', handleRouterStop);
+  btnRouterReload.addEventListener('click', handleRouterReload);
+  btnAddRoute.addEventListener('click', handleCreateRoute);
 }
 
 // Helper: Log message to scrolling console
@@ -181,6 +205,7 @@ function populateNodeDropdowns() {
   const currentMonitorValue = monitorNodeSelect.value;
   monitorNodeSelect.innerHTML = '<option value="">-- Select Node to Inspect --</option>';
   deployNodeSelect.innerHTML = '';
+  routeNodeSelect.innerHTML = '';
 
   nodesCache.forEach(node => {
     // Monitor Dropdown
@@ -194,6 +219,12 @@ function populateNodeDropdowns() {
     optDeploy.value = node.Name;
     optDeploy.textContent = node.Name;
     deployNodeSelect.appendChild(optDeploy);
+
+    // Route Target Dropdown
+    const optRoute = document.createElement('option');
+    optRoute.value = node.Name;
+    optRoute.textContent = node.Name;
+    routeNodeSelect.appendChild(optRoute);
   });
 
   if (currentMonitorValue && nodesCache.some(n => n.Name === currentMonitorValue)) {
@@ -578,4 +609,217 @@ function switchTab(tabName) {
     navItem.click();
   }
 }
+
+let currentRoutes = [];
+
+// Fetch Router Status
+async function fetchRouterStatus() {
+  try {
+    const response = await fetch('/api/router/status');
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      const status = data.router_status.toLowerCase();
+      routerStatusText.textContent = `Router Status: ${data.router_status.toUpperCase()}`;
+      
+      // Update badge indicator
+      routerStatusIndicator.className = 'status-dot';
+      if (status === 'running') {
+        routerStatusIndicator.classList.add('online');
+      } else {
+        // stopped / offline
+      }
+    } else {
+      routerStatusText.textContent = "Error loading status";
+    }
+  } catch (error) {
+    routerStatusText.textContent = "Offline";
+  }
+}
+
+// Fetch Router Routes
+async function fetchRouterRoutes() {
+  try {
+    const response = await fetch('/api/router/routes');
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      currentRoutes = data.routes || [];
+      renderRoutesTable(currentRoutes);
+    } else {
+      routesListBody.innerHTML = `<tr><td colspan="5" class="status-msg error" style="display:table-cell">Failed to load routes: ${data.message}</td></tr>`;
+    }
+  } catch (error) {
+    routesListBody.innerHTML = `<tr><td colspan="5" class="status-msg error" style="display:table-cell">Network Error: ${error.message}</td></tr>`;
+  }
+}
+
+// Render Routes Table
+function renderRoutesTable(routes) {
+  if (routes.length === 0) {
+    routesListBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-muted);">No active routes mapped.</td></tr>';
+    return;
+  }
+
+  // Sort routes so that domains are alphabetical
+  routes.sort((a, b) => a.domain.localeCompare(b.domain));
+
+  routesListBody.innerHTML = '';
+  routes.forEach(route => {
+    const tr = document.createElement('tr');
+    
+    const badgeTypeClass = route.auto_discovered ? 'auto' : 'custom';
+    const badgeTypeText = route.auto_discovered ? 'Auto' : 'Custom';
+    
+    // Delete action only for custom routes
+    const actionHtml = route.auto_discovered 
+      ? `<span style="font-size:0.75rem; color: var(--text-muted); padding-right: 0.5rem;">Managed</span>`
+      : `<button class="btn-delete-route" onclick="handleDeleteRoute('${route.domain}')">Delete</button>`;
+
+    tr.innerHTML = `
+      <td style="font-weight: 500; font-family: var(--font-sans);">${route.domain}</td>
+      <td style="color: var(--text-main);">${route.node}</td>
+      <td style="font-family: var(--font-mono); font-size: 0.75rem;">${route.port}</td>
+      <td><span class="route-badge ${badgeTypeClass}">${badgeTypeText}</span></td>
+      <td style="text-align: right;">${actionHtml}</td>
+    `;
+    routesListBody.appendChild(tr);
+  });
+}
+
+// Start Router
+async function handleRouterStart() {
+  showStatusMsg(routerControlStatus, 'Starting inbound Nginx router...', 'loading');
+  try {
+    const response = await fetch('/api/router/start', { method: 'POST' });
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      showStatusMsg(routerControlStatus, 'Router successfully started!', 'success');
+      logToConsole('Inbound Nginx router successfully started.', 'success');
+      fetchRouterStatus();
+    } else {
+      showStatusMsg(routerControlStatus, data.message || 'Failed to start router', 'error');
+    }
+  } catch (error) {
+    showStatusMsg(routerControlStatus, error.message, 'error');
+  }
+}
+
+// Stop Router
+async function handleRouterStop() {
+  showStatusMsg(routerControlStatus, 'Stopping inbound Nginx router...', 'loading');
+  try {
+    const response = await fetch('/api/router/stop', { method: 'POST' });
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      showStatusMsg(routerControlStatus, 'Router successfully stopped.', 'success');
+      logToConsole('Inbound Nginx router successfully stopped.', 'system');
+      fetchRouterStatus();
+    } else {
+      showStatusMsg(routerControlStatus, data.message || 'Failed to stop router', 'error');
+    }
+  } catch (error) {
+    showStatusMsg(routerControlStatus, error.message, 'error');
+  }
+}
+
+// Reload Router Config
+async function handleRouterReload() {
+  showStatusMsg(routerControlStatus, 'Reloading Nginx config...', 'loading');
+  try {
+    const response = await fetch('/api/router/reload', { method: 'POST' });
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      showStatusMsg(routerControlStatus, 'Config reloaded successfully!', 'success');
+      logToConsole('Regenerated configurations and reloaded Nginx router.', 'success');
+      fetchRouterStatus();
+      fetchRouterRoutes();
+    } else {
+      showStatusMsg(routerControlStatus, data.message || 'Failed to reload config', 'error');
+    }
+  } catch (error) {
+    showStatusMsg(routerControlStatus, error.message, 'error');
+  }
+}
+
+// Create Custom Route
+async function handleCreateRoute() {
+  const domain = routeDomainInput.value.trim();
+  const node = routeNodeSelect.value;
+  const portVal = routePortInput.value.trim();
+
+  if (!domain || !node || !portVal) {
+    showStatusMsg(routeCreateStatus, 'All route parameters are required', 'error');
+    return;
+  }
+
+  const port = parseInt(portVal, 10);
+  if (isNaN(port) || port <= 0 || port > 65535) {
+    showStatusMsg(routeCreateStatus, 'Port must be a valid number (1-65535)', 'error');
+    return;
+  }
+
+  showStatusMsg(routeCreateStatus, 'Saving custom route...', 'loading');
+
+  // Load existing custom routes from currentRoutes and filter out any existing entry for this domain
+  const customOnly = currentRoutes
+    .filter(r => !r.auto_discovered && r.domain !== domain);
+
+  // Add the new route
+  customOnly.push({
+    domain: domain,
+    node: node,
+    port: port,
+    auto_discovered: false
+  });
+
+  try {
+    const response = await fetch('/api/router/routes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routes: customOnly })
+    });
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      showStatusMsg(routeCreateStatus, 'Route successfully created!', 'success');
+      logToConsole(`Custom route created: ${domain} -> ${node}:${port}`, 'success');
+      routeDomainInput.value = '';
+      routePortInput.value = '';
+      fetchRouterRoutes();
+    } else {
+      showStatusMsg(routeCreateStatus, data.message || 'Failed to save route', 'error');
+    }
+  } catch (error) {
+    showStatusMsg(routeCreateStatus, error.message, 'error');
+  }
+}
+
+// Delete Route
+async function handleDeleteRoute(domain) {
+  if (!confirm(`Are you sure you want to delete the route for ${domain}?`)) {
+    return;
+  }
+
+  // Filter out the domain to delete
+  const customOnly = currentRoutes
+    .filter(r => !r.auto_discovered && r.domain !== domain);
+
+  try {
+    const response = await fetch('/api/router/routes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ routes: customOnly })
+    });
+    const data = await response.json();
+    if (response.ok && data.status === 'success') {
+      logToConsole(`Custom route deleted for domain: ${domain}`, 'system');
+      fetchRouterRoutes();
+    } else {
+      alert(`Failed to delete route: ${data.message}`);
+    }
+  } catch (error) {
+    alert(`Network Error: ${error.message}`);
+  }
+}
+
+// Bind handleDeleteRoute globally so HTML onclick handler can invoke it
+window.handleDeleteRoute = handleDeleteRoute;
 

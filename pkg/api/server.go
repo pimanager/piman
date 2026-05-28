@@ -15,6 +15,7 @@ import (
 	"github.com/sameerchandra/piman/pkg/config"
 	"github.com/sameerchandra/piman/pkg/deploy"
 	"github.com/sameerchandra/piman/pkg/docker"
+	"github.com/sameerchandra/piman/pkg/router"
 	"gopkg.in/yaml.v3"
 )
 
@@ -34,6 +35,14 @@ func StartServer(addr string) error {
 	mux.HandleFunc("POST /api/deploy", handleDeploy)
 	mux.HandleFunc("GET /api/status", handleStatus)
 	mux.HandleFunc("GET /api/catalog", handleCatalog)
+
+	// Router API endpoints
+	mux.HandleFunc("GET /api/router/status", handleRouterStatus)
+	mux.HandleFunc("POST /api/router/start", handleRouterStart)
+	mux.HandleFunc("POST /api/router/stop", handleRouterStop)
+	mux.HandleFunc("GET /api/router/routes", handleRouterRoutes)
+	mux.HandleFunc("POST /api/router/routes", handleRouterSaveRoutes)
+	mux.HandleFunc("POST /api/router/reload", handleRouterReload)
 
 	// Serve static embedded frontend assets at root "/"
 	subFS, err := fs.Sub(frontendFS, "frontend")
@@ -331,5 +340,93 @@ func handleCatalog(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"apps": apps,
+	})
+}
+
+func handleRouterStatus(w http.ResponseWriter, r *http.Request) {
+	status, err := router.GetRouterStatus()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status":        "success",
+		"router_status": status,
+	})
+}
+
+func handleRouterStart(w http.ResponseWriter, r *http.Request) {
+	err := router.StartRouter()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, genericResponse{
+		Status:  "success",
+		Message: "Router successfully started",
+	})
+}
+
+func handleRouterStop(w http.ResponseWriter, r *http.Request) {
+	err := router.StopRouter()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, genericResponse{
+		Status:  "success",
+		Message: "Router successfully stopped",
+	})
+}
+
+func handleRouterRoutes(w http.ResponseWriter, r *http.Request) {
+	routes, err := router.GetRoutes()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"status": "success",
+		"routes": routes,
+	})
+}
+
+func handleRouterSaveRoutes(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Routes []router.Route `json:"routes"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	err := router.SaveCustomRoutes(req.Routes)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Trigger configuration regeneration and reload Nginx
+	err = router.ReloadRouter()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Saved but reload failed: %v", err))
+		return
+	}
+
+	writeJSON(w, http.StatusOK, genericResponse{
+		Status:  "success",
+		Message: "Routes successfully saved and router reloaded",
+	})
+}
+
+func handleRouterReload(w http.ResponseWriter, r *http.Request) {
+	err := router.ReloadRouter()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, genericResponse{
+		Status:  "success",
+		Message: "Router configurations successfully reloaded",
 	})
 }

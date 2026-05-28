@@ -25,6 +25,7 @@
         <a href="#" class="nav-item active" data-tab="catalog"><i data-lucide="package"></i> App Catalog</a>
         <a href="#" class="nav-item " data-tab="nodes"><i data-lucide="server"></i> Cluster Nodes</a>
         <a href="#" class="nav-item" data-tab="monitor"><i data-lucide="activity"></i> Service Monitor</a>
+        <a href="#" class="nav-item" data-tab="router"><i data-lucide="globe"></i> Domain Router</a>
         <a href="#" class="nav-item" data-tab="settings"><i data-lucide="settings"></i> Settings & Sync</a>
       </nav>
       <div class="header-right">
@@ -137,6 +138,86 @@
               </div>
               <div id="terminal-console" class="terminal-console">
                 <div class="console-line system">Console initialized. Ready for operations...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: Domain Router -->
+      <section id="tab-router" class="tab-content hidden">
+        <div class="page-header header-with-action">
+          <div>
+            <h1><i data-lucide="globe" class="header-icon"></i> Domain Router</h1>
+            <p class="section-desc">Manage local Nginx inbound routing, reverse-proxying custom domains to your cluster apps.</p>
+          </div>
+          <div class="router-status-badge-container" style="display: flex; align-items: center; gap: 0.5rem;">
+            <span id="router-status-indicator" class="status-dot"></span>
+            <span id="router-status-text" class="help-text-sub" style="font-weight: 600; font-size: 0.8125rem; color: var(--text-muted);">Loading Router Status...</span>
+          </div>
+        </div>
+
+        <div class="split-layout">
+          <!-- Router Control Card & Custom Route Creator -->
+          <div class="pane-left">
+            <div class="notion-card">
+              <h3 class="pane-title">Router Controls</h3>
+              <p class="help-text" style="margin-bottom: 0.75rem;">Start, stop, or reload the local Nginx reverse proxy.</p>
+              <div class="action-btn-group" style="display: flex; gap: 0.5rem; margin-bottom: 0;">
+                <button id="btn-router-start" class="btn btn-primary">Start Router</button>
+                <button id="btn-router-stop" class="btn btn-secondary">Stop Router</button>
+                <button id="btn-router-reload" class="btn btn-secondary">Reload Config</button>
+              </div>
+              <div id="router-control-status" class="status-msg"></div>
+            </div>
+
+            <div class="notion-card" style="margin-top: 1.25rem;">
+              <h3 class="pane-title">Create Custom Route</h3>
+              <p class="help-text" style="margin-bottom: 0.75rem;">Map a custom domain (e.g. <code>myapp.local</code>) to a specific cluster node and port.</p>
+              
+              <div class="form-group">
+                <label for="route-domain">Domain Name</label>
+                <input type="text" id="route-domain" placeholder="e.g. webapp.local">
+              </div>
+              
+              <div class="form-group">
+                <label for="route-node">Target Cluster Node</label>
+                <select id="route-node" class="select-node-modal">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="route-port">Exposed Host Port</label>
+                <input type="text" id="route-port" placeholder="e.g. 8080">
+              </div>
+              
+              <button id="btn-add-route" class="btn btn-primary" style="width: auto;">Add Route</button>
+              <div id="route-create-status" class="status-msg"></div>
+            </div>
+          </div>
+
+          <!-- Active Routes Table -->
+          <div class="pane-right">
+            <div class="notion-card" style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding-bottom: 0.75rem;">
+              <h3 class="pane-title">Active Routes</h3>
+              <p class="help-text" style="margin-bottom: 0.75rem;">Combined list of auto-discovered and custom configured reverse proxy routes.</p>
+              
+              <div style="overflow-y: auto; flex: 1;" class="routes-table-container">
+                <table class="routes-table" style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                  <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                      <th style="padding: 0.5rem 0.25rem;">Domain</th>
+                      <th style="padding: 0.5rem 0.25rem;">Target Node</th>
+                      <th style="padding: 0.5rem 0.25rem;">Port</th>
+                      <th style="padding: 0.5rem 0.25rem;">Type</th>
+                      <th style="padding: 0.5rem 0.25rem; text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="routes-list-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

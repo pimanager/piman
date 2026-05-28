@@ -778,3 +778,67 @@ input[type="text"]:focus, input[type="password"]:focus, select:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(55, 53, 47, 0.16);
 }
+
+/* Domain Router Styles */
+.router-status-badge-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-sidebar);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.routes-table-container {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: #ffffff;
+  padding: 0.25rem 0.5rem;
+}
+
+.routes-table th, .routes-table td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.routes-table tr:last-child td {
+  border-bottom: none;
+}
+
+.routes-table tbody tr:hover {
+  background-color: var(--bg-sidebar);
+}
+
+.route-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.route-badge.auto {
+  background-color: var(--badge-green-bg);
+  color: var(--badge-green-text);
+}
+
+.route-badge.custom {
+  background-color: var(--badge-orange-bg);
+  color: var(--badge-orange-text);
+}
+
+.btn-delete-route {
+  color: var(--badge-red-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.btn-delete-route:hover {
+  background-color: var(--badge-red-bg);
+}
