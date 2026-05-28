@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>piMan — Lightweight Raspberry Pi Cluster Orchestrator</title>
   <!-- Modern Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <style>
     :root {
       --bg-main: #09090b;
@@ -16,7 +19,8 @@
       --border-color: rgba(63, 63, 70, 0.4);
       --text-main: #f4f4f5;
       --text-muted: #a1a1aa;
-      --primary: #3b82f6; /* Modern Blue */
+      --primary: #3b82f6;
+      /* Modern Blue */
       --primary-hover: #2563eb;
       --accent-glow: rgba(59, 130, 246, 0.15);
       --command-text-color: #e4e4e7;
@@ -24,7 +28,7 @@
       --badge-border: rgba(59, 130, 246, 0.2);
       --feature-icon-bg: rgba(59, 130, 246, 0.1);
       --feature-hover-border: rgba(59, 130, 246, 0.3);
-      
+
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
     }
@@ -35,7 +39,8 @@
       --border-color: rgba(228, 228, 231, 0.9);
       --text-main: #1f1f1f;
       --text-muted: #787774;
-      --primary: #2383e2; /* Notion Blue */
+      --primary: #2383e2;
+      /* Notion Blue */
       --primary-hover: #1b66b1;
       --accent-glow: rgba(35, 131, 226, 0.08);
       --command-text-color: #1f1f1f;
@@ -81,7 +86,7 @@
       color: var(--text-main);
       background-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     :root.light .theme-toggle-btn:hover {
       background-color: rgba(0, 0, 0, 0.05);
     }
@@ -130,7 +135,8 @@
       color: var(--primary);
     }
 
-    .github-btn {
+    .github-btn,
+    .discord-btn {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -141,7 +147,8 @@
       transition: color 0.2s;
     }
 
-    .github-btn:hover {
+    .github-btn:hover,
+    .discord-btn:hover {
       color: var(--text-main);
     }
 
@@ -187,7 +194,9 @@
     }
 
     @media (max-width: 600px) {
-      h1 { font-size: 2.25rem; }
+      h1 {
+        font-size: 2.25rem;
+      }
     }
 
     .lead {
@@ -346,10 +355,11 @@
     }
   </style>
 </head>
+
 <body>
   <script>
     // Inline script to prevent theme flash
-    (function() {
+    (function () {
       const savedTheme = localStorage.getItem('piman-theme');
       const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
@@ -370,6 +380,10 @@
       <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
         <i data-lucide="sun" id="theme-icon" style="width: 18px; height: 18px; stroke-width: 2px;"></i>
       </button>
+      <a href="https://discord.gg/hsxUgE2MZ" class="discord-btn" target="_blank">
+        <i data-lucide="message-square"></i>
+        <span>Discord</span>
+      </a>
       <a href="https://github.com/pimanager/piman" class="github-btn" target="_blank">
         <i data-lucide="github"></i>
         <span>GitHub</span>
@@ -382,17 +396,16 @@
     <div class="hero-container">
       <div class="badge-premium">Homeserver Orchestrator</div>
       <h1>Lightweight Raspberry Pi & Linux Cluster Manager</h1>
-      <p class="lead">Deploy homeserver apps, customize ports, and auto-route domains through a secure, self-hosted Nginx reverse proxy.</p>
+      <p class="lead">Deploy homeserver apps, customize ports, and auto-route domains through a secure, self-hosted
+        Nginx reverse proxy.</p>
 
       <!-- Get Started & Install Command (Matches Mock Image) -->
       <div class="installer-row">
-        <a href="#features" class="btn-get-started">
-          <span>Get Started</span>
-          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </a>
+
         <div class="command-box">
           <!-- Dynamically generates URL based on current host domain -->
-          <span class="command-text" id="install-cmd">curl -fsSL https://pimanager.github.io/piman/install.sh | bash</span>
+          <span class="command-text" id="install-cmd">curl -fsSL https://pimanager.github.io/piman/install.sh |
+            bash</span>
           <button class="btn-copy" id="btn-copy-cmd" title="Copy to Clipboard">
             <i data-lucide="copy" id="copy-icon" style="width: 16px; height: 16px;"></i>
           </button>
@@ -431,14 +444,18 @@
 
   <!-- Footer -->
   <footer>
-    <p>Released under the MIT License. Built for Raspberry Pi & Linux clusters.</p>
+    <p style="margin-bottom: 0.5rem;">Released under the MIT License. Built for Raspberry Pi & Linux clusters.</p>
+    <p>
+      <a href="https://github.com/pimanager/piman" target="_blank" style="margin-right: 1.25rem;">GitHub</a>
+      <a href="https://discord.gg/hsxUgE2MZ" target="_blank">Discord</a>
+    </p>
   </footer>
 
   <script>
     // Initialize Theme Toggle Icon and Handler
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
-    
+
     if (document.documentElement.classList.contains('light')) {
       themeIcon.setAttribute('data-lucide', 'moon');
     } else {
@@ -464,10 +481,10 @@
     const installCmd = document.getElementById('install-cmd');
     const currentOrigin = window.location.origin;
     const currentPath = window.location.pathname;
-    
+
     // Default fallback
     let scriptURL = "https://pimanager.github.io/piman/install.sh";
-    
+
     if (window.location.hostname && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1")) {
       // Build clean URL matching the GitHub Pages deployment path
       const cleanPath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
@@ -499,4 +516,5 @@
     });
   </script>
 </body>
+
 </html>
