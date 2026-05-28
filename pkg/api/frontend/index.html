@@ -15,23 +15,28 @@
 <body>
   <div class="app-layout">
 
-    <!-- Left Sidebar (Notion style) -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <i data-lucide="folder" class="sidebar-icon"></i>
-        <span class="sidebar-title">piStore Workspace</span>
+    <!-- Top Header -->
+    <header class="header">
+      <div class="header-left">
+        <i data-lucide="folder" class="header-logo-icon"></i>
+        <span class="header-title">piMan</span>
       </div>
-      <nav class="sidebar-nav">
-
+      <nav class="header-nav">
         <a href="#" class="nav-item active" data-tab="catalog"><i data-lucide="package"></i> App Catalog</a>
         <a href="#" class="nav-item " data-tab="nodes"><i data-lucide="server"></i> Cluster Nodes</a>
         <a href="#" class="nav-item" data-tab="monitor"><i data-lucide="activity"></i> Service Monitor</a>
         <a href="#" class="nav-item" data-tab="settings"><i data-lucide="settings"></i> Settings & Sync</a>
       </nav>
-      <div class="sidebar-footer">
-        <span class="status-dot online"></span> API Server Connected
+      <div class="header-right">
+        <a href="https://github.com/pimanager/piman" target="_blank" rel="noopener noreferrer" class="github-link"
+          title="GitHub Repository">
+          <i data-lucide="github"></i>
+        </a>
+        <div class="status-badge">
+          <span class="status-dot online"></span> API Connected
+        </div>
       </div>
-    </aside>
+    </header>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -175,6 +180,14 @@
         <div class="form-group">
           <label for="deploy-compose-path">Docker Compose Path</label>
           <input type="text" id="deploy-compose-path" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="deploy-ports">Custom Port Mappings (Optional)</label>
+          <input type="text" id="deploy-ports" placeholder="e.g. 8080:80, web:8080:80">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">
+            Format: <code>[service:]host_port:container_port</code>. Separate multiple with commas.
+          </span>
         </div>
 
         <div class="modal-footer">

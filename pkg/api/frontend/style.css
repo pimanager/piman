@@ -45,49 +45,81 @@ body {
 
 /* App Layout */
 .app-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
 }
 
-/* Left Sidebar styling */
-.sidebar {
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
-  padding: 1.5rem 0.75rem;
+/* Top Header styling */
+.header {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 2rem;
+  height: 56px;
+  flex-shrink: 0;
 }
 
-.sidebar-header {
+.header-left {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0 0.5rem 1rem 0.5rem;
-  border-bottom: 1px solid rgba(55, 53, 47, 0.08);
-  margin-bottom: 1rem;
 }
 
-.sidebar-icon {
+.header-logo-icon {
   width: 18px;
   height: 18px;
   stroke-width: 2px;
   color: var(--text-main);
 }
 
-.sidebar-title {
+.header-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-main);
 }
 
-.sidebar-nav {
+.header-nav {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex-grow: 1;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.github-link {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, transform 0.1s;
+}
+
+.github-link:hover {
+  color: var(--text-main);
+  transform: scale(1.05);
+}
+
+.github-link svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8px;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-left: 1px solid var(--border-color);
+  padding-left: 1rem;
 }
 
 .nav-item {
@@ -124,16 +156,6 @@ body {
   color: var(--color-primary);
 }
 
-.sidebar-footer {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  padding: 0.5rem;
-  border-top: 1px solid rgba(55, 53, 47, 0.08);
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
 .status-dot {
   width: 6px;
   height: 6px;
@@ -154,6 +176,8 @@ body {
   background-color: var(--bg-main);
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .tab-content {

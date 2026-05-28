@@ -283,6 +283,10 @@ function openDeployModal(app) {
   appToDeploy = app;
   deployModalAppInfo.innerHTML = `Deploying <strong>${app.title || app.name}</strong> to your cluster.`;
   deployComposePath.value = app.compose_path || '';
+  const portsInput = document.getElementById('deploy-ports');
+  if (portsInput) {
+    portsInput.value = '';
+  }
   deployModal.classList.remove('hidden');
 }
 
@@ -394,6 +398,9 @@ async function handleDeploySubmit() {
     return;
   }
 
+  const portsValue = (document.getElementById('deploy-ports')?.value || '').trim();
+  const portsArray = portsValue ? portsValue.split(',').map(p => p.trim()).filter(Boolean) : [];
+
   const appName = appToDeploy.name;
   deployModal.classList.add('hidden');
   
@@ -409,7 +416,7 @@ async function handleDeploySubmit() {
     const response = await fetch('/api/deploy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ node: targetNode, compose_path: composePath })
+      body: JSON.stringify({ node: targetNode, compose_path: composePath, ports: portsArray })
     });
 
     const responseText = await response.text();

@@ -61,8 +61,9 @@ type syncRequest struct {
 }
 
 type deployRequest struct {
-	Node        string `json:"node"`
-	ComposePath string `json:"compose_path"`
+	Node        string   `json:"node"`
+	ComposePath string   `json:"compose_path"`
+	Ports       []string `json:"ports"`
 }
 
 type CatalogApp struct {
@@ -210,8 +211,18 @@ func handleDeploy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var overrides []deploy.PortOverride
+	for _, p := range req.Ports {
+		override, err := deploy.ParsePortOverride(p)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, fmt.Sprintf("Invalid port override format: %v", err))
+			return
+		}
+		overrides = append(overrides, override)
+	}
+
 	var buf bytes.Buffer
-	err := deploy.Deploy(req.Node, req.ComposePath, &buf)
+	err := deploy.Deploy(req.Node, req.ComposePath, overrides, &buf)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
 			"status":  "error",

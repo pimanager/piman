@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	portsList []string
+)
+
 var deployCmd = &cobra.Command{
 	Use:   "deploy [node] [path-to-docker-compose.yml]",
 	Short: "Deploy an application to a worker node",
@@ -24,10 +28,20 @@ var deployCmd = &cobra.Command{
 			return errors.New("compose file path cannot be empty")
 		}
 
-		return deploy.Deploy(nodeName, composePath, os.Stdout)
+		var overrides []deploy.PortOverride
+		for _, p := range portsList {
+			override, err := deploy.ParsePortOverride(p)
+			if err != nil {
+				return err
+			}
+			overrides = append(overrides, override)
+		}
+
+		return deploy.Deploy(nodeName, composePath, overrides, os.Stdout)
 	},
 }
 
 func init() {
+	deployCmd.Flags().StringSliceVarP(&portsList, "port", "p", nil, "Customize ports (format: [service:]host_port:container_port)")
 	rootCmd.AddCommand(deployCmd)
 }
