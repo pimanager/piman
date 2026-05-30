@@ -149,11 +149,13 @@
         <div class="page-header header-with-action">
           <div>
             <h1><i data-lucide="globe" class="header-icon"></i> Domain Router</h1>
-            <p class="section-desc">Manage local Nginx inbound routing, reverse-proxying custom domains to your cluster apps.</p>
+            <p class="section-desc">Manage local Nginx inbound routing, reverse-proxying custom domains to your cluster
+              apps.</p>
           </div>
           <div class="router-status-badge-container" style="display: flex; align-items: center; gap: 0.5rem;">
             <span id="router-status-indicator" class="status-dot"></span>
-            <span id="router-status-text" class="help-text-sub" style="font-weight: 600; font-size: 0.8125rem; color: var(--text-muted);">Loading Router Status...</span>
+            <span id="router-status-text" class="help-text-sub"
+              style="font-weight: 600; font-size: 0.8125rem; color: var(--text-muted);">Loading Router Status...</span>
           </div>
         </div>
 
@@ -162,7 +164,8 @@
           <div class="pane-left">
             <div class="notion-card">
               <h3 class="pane-title">Router Controls</h3>
-              <p class="help-text" style="margin-bottom: 0.75rem;">Start, stop, or reload the local Nginx reverse proxy.</p>
+              <p class="help-text" style="margin-bottom: 0.75rem;">Start, stop, or reload the local Nginx reverse proxy.
+              </p>
               <div class="action-btn-group" style="display: flex; gap: 0.5rem; margin-bottom: 0;">
                 <button id="btn-router-start" class="btn btn-primary">Start Router</button>
                 <button id="btn-router-stop" class="btn btn-secondary">Stop Router</button>
@@ -173,25 +176,26 @@
 
             <div class="notion-card" style="margin-top: 1.25rem;">
               <h3 class="pane-title">Create Custom Route</h3>
-              <p class="help-text" style="margin-bottom: 0.75rem;">Map a custom domain (e.g. <code>myapp.local</code>) to a specific cluster node and port.</p>
-              
+              <p class="help-text" style="margin-bottom: 0.75rem;">Map a custom domain (e.g. <code>myapp.local</code>)
+                to a specific cluster node and port.</p>
+
               <div class="form-group">
                 <label for="route-domain">Domain Name</label>
                 <input type="text" id="route-domain" placeholder="e.g. webapp.local">
               </div>
-              
+
               <div class="form-group">
                 <label for="route-node">Target Cluster Node</label>
                 <select id="route-node" class="select-node-modal">
                   <!-- Dynamically populated -->
                 </select>
               </div>
-              
+
               <div class="form-group">
                 <label for="route-port">Exposed Host Port</label>
                 <input type="text" id="route-port" placeholder="e.g. 8080">
               </div>
-              
+
               <button id="btn-add-route" class="btn btn-primary" style="width: auto;">Add Route</button>
               <div id="route-create-status" class="status-msg"></div>
             </div>
@@ -199,14 +203,17 @@
 
           <!-- Active Routes Table -->
           <div class="pane-right">
-            <div class="notion-card" style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding-bottom: 0.75rem;">
+            <div class="notion-card"
+              style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding-bottom: 0.75rem;">
               <h3 class="pane-title">Active Routes</h3>
-              <p class="help-text" style="margin-bottom: 0.75rem;">Combined list of auto-discovered and custom configured reverse proxy routes.</p>
-              
+              <p class="help-text" style="margin-bottom: 0.75rem;">Combined list of auto-discovered and custom
+                configured reverse proxy routes.</p>
+
               <div style="overflow-y: auto; flex: 1;" class="routes-table-container">
                 <table class="routes-table" style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
                   <thead>
-                    <tr style="text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <tr
+                      style="text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
                       <th style="padding: 0.5rem 0.25rem;">Domain</th>
                       <th style="padding: 0.5rem 0.25rem;">Target Node</th>
                       <th style="padding: 0.5rem 0.25rem;">Port</th>
@@ -235,8 +242,8 @@
           <h3 class="pane-title">Catalog Source Repository</h3>
           <div class="form-group">
             <label for="sync-repo-url">Git Repository URL</label>
-            <input type="text" id="sync-repo-url" placeholder="https://github.com/org/catalog.git"
-              value="https://github.com/sameerchandra/piman.git">
+            <input type="text" id="sync-repo-url" placeholder="https://github.com/pimanager/piman-catalog.git"
+              value="https://github.com/pimanager/piman-catalog.git">
           </div>
           <button id="btn-sync" class="btn btn-primary" style="width: auto;">Sync Repository</button>
           <div id="sync-status-msg" class="status-msg"></div>

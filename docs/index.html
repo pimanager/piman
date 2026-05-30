@@ -156,15 +156,21 @@
     main {
       flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      width: 100%;
       padding: 3rem 1.5rem;
       z-index: 10;
     }
 
     .hero-container {
+      width: 100%;
       max-width: 800px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .badge-premium {
@@ -211,6 +217,8 @@
       gap: 1rem;
       flex-wrap: wrap;
       margin-bottom: 4rem;
+      width: 100%;
+      max-width: 100%;
     }
 
     .btn-get-started {
@@ -249,6 +257,7 @@
       gap: 1rem;
       backdrop-filter: blur(10px);
       max-width: 100%;
+      min-width: 0;
     }
 
     .command-text {
@@ -260,6 +269,7 @@
       overflow-x: auto;
       white-space: nowrap;
       scrollbar-width: none;
+      min-width: 0;
     }
 
     .command-text::-webkit-scrollbar {
@@ -293,6 +303,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
+      width: 100%;
       max-width: 900px;
       margin: 0 auto;
       text-align: left;
