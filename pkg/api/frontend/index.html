@@ -52,7 +52,13 @@
 
         <div class="split-layout">
           <div class="pane-left">
-            <h3 class="pane-title">Registered Nodes</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 class="pane-title" style="margin-bottom: 0;">Registered Nodes</h3>
+              <button id="btn-open-add-node" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8125rem; display: flex; align-items: center; gap: 0.25rem;">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>Add Node</span>
+              </button>
+            </div>
             <div id="nodes-list" class="nodes-list-container">
               <div class="loading-spinner">Loading nodes...</div>
             </div>
@@ -282,6 +288,35 @@
           <button id="btn-modal-cancel" class="btn btn-secondary">Cancel</button>
           <button id="btn-modal-submit" class="btn btn-primary">Deploy Now</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Add Node Modal -->
+    <div id="node-modal" class="modal-overlay hidden">
+      <div class="modal-content notion-card">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.125rem; font-weight: 600;">Add New Node</h3>
+        <p class="help-text" style="margin-bottom: 1.25rem;">Add a new target Raspberry Pi or Linux server to your cluster.</p>
+
+        <div class="form-group">
+          <label for="new-node-name">Node Name</label>
+          <input type="text" id="new-node-name" placeholder="e.g. pi4">
+        </div>
+
+        <div class="form-group">
+          <label for="new-node-ip">IP Address or Hostname</label>
+          <input type="text" id="new-node-ip" placeholder="e.g. 192.168.1.100 or pi4.local">
+        </div>
+
+        <div class="form-group">
+          <label for="new-node-username">SSH Username</label>
+          <input type="text" id="new-node-username" placeholder="e.g. pi">
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button id="btn-node-modal-cancel" class="btn btn-secondary" style="width: auto;">Cancel</button>
+          <button id="btn-node-modal-submit" class="btn btn-primary" style="width: auto;">Add Node</button>
+        </div>
+        <div id="node-create-status" class="status-msg" style="margin-top: 0.5rem;"></div>
       </div>
     </div>
 

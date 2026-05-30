@@ -136,3 +136,50 @@ func GetNodePrivateKeyPath(nodeName string) (string, error) {
 	return "", fmt.Errorf("no SSH private key found for node %q (checked %s and %s)", nodeName, nodeKeyPath, fallbackKeyPath)
 }
 
+// SaveConfig writes the nodes.yaml configuration file
+func SaveConfig(cfg *Config) error {
+	dir, err := GetPistoreDir()
+	if err != nil {
+		return err
+	}
+
+	nodesPath := filepath.Join(dir, "nodes.yaml")
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	return os.WriteFile(nodesPath, data, 0644)
+}
+
+// AddNode adds a new node to the configuration
+func AddNode(node Node) error {
+	if node.Name == "" || node.IP == "" || node.Username == "" {
+		return fmt.Errorf("node fields (name, ip, username) cannot be empty")
+	}
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		// If nodes.yaml doesn't exist, initialize base first
+		_, err = InitPistoreDir()
+		if err != nil {
+			return err
+		}
+		cfg, err = LoadConfig()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check for duplicates
+	for _, n := range cfg.Nodes {
+		if n.Name == node.Name {
+			return fmt.Errorf("node with name %q already exists", node.Name)
+		}
+	}
+
+	cfg.Nodes = append(cfg.Nodes, node)
+	return SaveConfig(cfg)
+}
+
+

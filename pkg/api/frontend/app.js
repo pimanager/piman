@@ -144,6 +144,32 @@ function setupEventListeners() {
   btnRouterStop.addEventListener('click', handleRouterStop);
   btnRouterReload.addEventListener('click', handleRouterReload);
   btnAddRoute.addEventListener('click', handleCreateRoute);
+
+  // Add Node Modal Controls
+  const btnOpenAddNode = document.getElementById('btn-open-add-node');
+  const btnNodeModalCancel = document.getElementById('btn-node-modal-cancel');
+  const btnNodeModalSubmit = document.getElementById('btn-node-modal-submit');
+  const nodeModal = document.getElementById('node-modal');
+  const nodeCreateStatus = document.getElementById('node-create-status');
+
+  if (btnOpenAddNode) {
+    btnOpenAddNode.addEventListener('click', () => {
+      nodeModal.classList.remove('hidden');
+      if (nodeCreateStatus) {
+        nodeCreateStatus.style.display = 'none';
+      }
+    });
+  }
+
+  if (btnNodeModalCancel) {
+    btnNodeModalCancel.addEventListener('click', () => {
+      nodeModal.classList.add('hidden');
+    });
+  }
+
+  if (btnNodeModalSubmit) {
+    btnNodeModalSubmit.addEventListener('click', handleAddNodeSubmit);
+  }
 }
 
 // Helper: Log message to scrolling console
@@ -415,6 +441,56 @@ async function handleBootstrapNode() {
   } catch (error) {
     showStatusMsg(nodeActionsStatus, `Network error: ${error.message}`, 'error');
     logToConsole(`Bootstrap network error: ${error.message}`, 'error');
+  }
+}
+
+// Add Node Action
+async function handleAddNodeSubmit() {
+  const nameInput = document.getElementById('new-node-name');
+  const ipInput = document.getElementById('new-node-ip');
+  const usernameInput = document.getElementById('new-node-username');
+  const statusMsg = document.getElementById('node-create-status');
+
+  const name = nameInput.value.trim();
+  const ip = ipInput.value.trim();
+  const username = usernameInput.value.trim();
+
+  if (!name || !ip || !username) {
+    showStatusMsg(statusMsg, 'All fields (Name, IP, Username) are required', 'error');
+    return;
+  }
+
+  showStatusMsg(statusMsg, `Adding node ${name}...`, 'loading');
+  logToConsole(`Adding new node: ${name} (${ip})`, 'system');
+
+  try {
+    const response = await fetch('/api/nodes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, ip, username })
+    });
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      showStatusMsg(statusMsg, 'Node added successfully!', 'success');
+      logToConsole(`Node ${name} added successfully.`, 'success');
+      nameInput.value = '';
+      ipInput.value = '';
+      usernameInput.value = '';
+      fetchNodes(); // Refresh the list
+      setTimeout(() => {
+        const nodeModal = document.getElementById('node-modal');
+        if (nodeModal) {
+          nodeModal.classList.add('hidden');
+        }
+      }, 1000);
+    } else {
+      showStatusMsg(statusMsg, data.message || 'Failed to add node', 'error');
+      logToConsole(`Failed to add node: ${data.message}`, 'error');
+    }
+  } catch (error) {
+    showStatusMsg(statusMsg, `Network error: ${error.message}`, 'error');
+    logToConsole(`Add node network error: ${error.message}`, 'error');
   }
 }
 

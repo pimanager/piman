@@ -29,6 +29,7 @@ func StartServer(addr string) error {
 	// Register API routes (using Go 1.22+ method matching)
 	mux.HandleFunc("POST /api/init", handleInit)
 	mux.HandleFunc("GET /api/nodes", handleNodes)
+	mux.HandleFunc("POST /api/nodes", handleAddNode)
 	mux.HandleFunc("POST /api/keygen", handleKeygen)
 	mux.HandleFunc("POST /api/bootstrap", handleBootstrap)
 	mux.HandleFunc("POST /api/sync", handleSync)
@@ -130,6 +131,40 @@ func handleNodes(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"nodes": cfg.Nodes,
+	})
+}
+
+type addNodeRequest struct {
+	Name     string `json:"name"`
+	IP       string `json:"ip"`
+	Username string `json:"username"`
+}
+
+func handleAddNode(w http.ResponseWriter, r *http.Request) {
+	var req addNodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if req.Name == "" || req.IP == "" || req.Username == "" {
+		writeError(w, http.StatusBadRequest, "Name, IP, and Username are all required")
+		return
+	}
+
+	err := config.AddNode(config.Node{
+		Name:     req.Name,
+		IP:       req.IP,
+		Username: req.Username,
+	})
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to add node: %v", err))
+		return
+	}
+
+	writeJSON(w, http.StatusOK, genericResponse{
+		Status:  "success",
+		Message: fmt.Sprintf("Node %q successfully added", req.Name),
 	})
 }
 

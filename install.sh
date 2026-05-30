@@ -47,6 +47,84 @@ else
     exit 1
 fi
 
+# 2. Dependency Check (Docker or Nginx)
+echo -e "Checking router prerequisites..."
+HAS_DOCKER=0
+HAS_NGINX=0
+if command -v docker >/dev/null 2>&1; then
+    HAS_DOCKER=1
+fi
+if command -v nginx >/dev/null 2>&1; then
+    HAS_NGINX=1
+fi
+
+if [ $HAS_DOCKER -eq 0 ] && [ $HAS_NGINX -eq 0 ]; then
+    echo -e "${YELLOW}Warning: Neither Docker nor Nginx was found on this system.${NC}"
+    echo -e "piMan requires at least Docker or Nginx to manage router operations."
+    
+    # Check if apt-get is available to install nginx
+    if command -v apt-get >/dev/null 2>&1; then
+        read -p "Would you like to install Nginx now? [Y/n] " -n 1 -r REPLY_INSTALL_NGINX
+        echo ""
+        if [[ $REPLY_INSTALL_NGINX =~ ^[Yy]$ ]] || [ -z "$REPLY_INSTALL_NGINX" ]; then
+            echo -e "Installing Nginx..."
+            if [ "$USER" = "root" ]; then
+                apt-get update && apt-get install -y nginx
+            else
+                sudo apt-get update && sudo apt-get install -y nginx
+            fi
+            HAS_NGINX=1
+        fi
+    fi
+    
+    if [ $HAS_NGINX -eq 0 ]; then
+        echo -e "${RED}Error: Cannot proceed without Docker or Nginx installed.${NC}"
+        exit 1
+    fi
+fi
+
+# 3. Port Configuration & Availability Check
+DEFAULT_PORT=8080
+PORT=$DEFAULT_PORT
+
+while true; do
+    read -p "Enter port for piMan service [default: $DEFAULT_PORT]: " USER_PORT
+    if [ -z "$USER_PORT" ]; then
+        PORT=$DEFAULT_PORT
+    else
+        PORT=$USER_PORT
+    fi
+    
+    # Check if port is a valid number
+    if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+        echo -e "${RED}Error: Port must be a valid number between 1 and 65535.${NC}"
+        continue
+    fi
+    
+    # Check port availability using ss, netstat, or lsof
+    PORT_IN_USE=0
+    if command -v ss >/dev/null 2>&1; then
+        if ss -tuln | grep -q -E ":$PORT\b"; then
+            PORT_IN_USE=1
+        fi
+    elif command -v netstat >/dev/null 2>&1; then
+        if netstat -tuln | grep -q -E ":$PORT\b"; then
+            PORT_IN_USE=1
+        fi
+    elif command -v lsof >/dev/null 2>&1; then
+        if lsof -i :$PORT >/dev/null 2>&1; then
+            PORT_IN_USE=1
+        fi
+    fi
+    
+    if [ $PORT_IN_USE -eq 1 ]; then
+        echo -e "${RED}Error: Port $PORT is already in use. Please select a different port.${NC}"
+    else
+        echo -e "${GREEN}Port $PORT is available.${NC}"
+        break
+    fi
+done
+
 # 2. Get latest version tag from GitHub API
 echo -e "Fetching latest release tag from GitHub..."
 LATEST_TAG=$(curl -s "https://api.github.com/repos/pimanager/piman/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -113,7 +191,7 @@ After=network.target
 Type=simple
 User=$REAL_USER
 Environment=HOME=$REAL_HOME
-ExecStart=$INSTALL_DIR/piman serve --port 8080
+ExecStart=$INSTALL_DIR/piman serve --port $PORT
 Restart=on-failure
 RestartSec=5
 
@@ -132,8 +210,73 @@ WantedBy=multi-user.target"
         sudo systemctl start piman.service
 
         echo -e "${GREEN}piMan service successfully started!${NC}"
-        echo -e "Access the server at: ${CYAN}http://localhost:8080${NC}"
+        echo -e "Access the server at: ${CYAN}http://localhost:$PORT${NC}"
         echo -e "Check service logs with: ${CYAN}journalctl -u piman -f${NC}"
+    fi
+fi
+
+# 8. Interactive Nginx Reverse Proxy Setup
+if command -v nginx >/dev/null 2>&1; then
+    echo ""
+    read -p "Do you want to configure Nginx to expose piMan at http://piman.local? [Y/n] " -n 1 -r REPLY_NGINX
+    echo ""
+    if [[ $REPLY_NGINX =~ ^[Yy]$ ]] || [ -z "$REPLY_NGINX" ]; then
+        NGINX_CONF_DIR="/etc/nginx/conf.d"
+        NGINX_CONF_FILE="$NGINX_CONF_DIR/piman.conf"
+        
+        echo -e "Generating Nginx configuration file..."
+        NGINX_CONTENT="server {
+    listen 80;
+    server_name piman.local;
+
+    location / {
+        proxy_pass http://127.0.0.1:$PORT;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # WebSockets support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+}"
+        
+        # Ensure Nginx conf directory exists
+        if [ ! -d "$NGINX_CONF_DIR" ]; then
+            if [ -w "/etc/nginx" ]; then
+                mkdir -p "$NGINX_CONF_DIR"
+            else
+                sudo mkdir -p "$NGINX_CONF_DIR"
+            fi
+        fi
+
+        # Write the conf file
+        if [ -w "$NGINX_CONF_DIR" ]; then
+            echo "$NGINX_CONTENT" > "$NGINX_CONF_FILE"
+        else
+            echo "$NGINX_CONTENT" | sudo tee "$NGINX_CONF_FILE" > /dev/null
+        fi
+        
+        # Validate Nginx configuration
+        echo -e "Validating Nginx configuration..."
+        if sudo nginx -t; then
+            echo -e "Reloading Nginx service..."
+            if command -v systemctl >/dev/null 2>&1; then
+                sudo systemctl reload nginx || sudo systemctl restart nginx
+            else
+                sudo service nginx reload || sudo service nginx restart
+            fi
+            echo -e "${GREEN}Nginx configured successfully! piMan is now exposed at: http://piman.local${NC}"
+        else
+            echo -e "${RED}Error: Nginx configuration validation failed. Removing piman.conf...${NC}"
+            if [ -w "$NGINX_CONF_FILE" ]; then
+                rm "$NGINX_CONF_FILE"
+            else
+                sudo rm "$NGINX_CONF_FILE"
+            fi
+        fi
     fi
 fi
 
