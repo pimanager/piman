@@ -69,10 +69,57 @@ var routerStatusCmd = &cobra.Command{
 	},
 }
 
+var hostsIpFlag string
+
+var routerHostsCmd = &cobra.Command{
+	Use:   "hosts [command]",
+	Short: "Manage entries in local hosts file",
+	Long:  `View or automatically configure local hosts file (/etc/hosts) to resolve cluster app domains.`,
+}
+
+var routerHostsPrintCmd = &cobra.Command{
+	Use:   "print",
+	Short: "Print required hosts file configuration block",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		block, err := router.GenerateHostsBlock(hostsIpFlag)
+		if err != nil {
+			return err
+		}
+		fmt.Print(block)
+		return nil
+	},
+}
+
+var routerHostsSetupCmd = &cobra.Command{
+	Use:   "setup",
+	Short: "Automatically add/update app domains in the system hosts file",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Printf("Updating system hosts file (%s) to map domains to %s...\n", router.GetHostsPath(), hostsIpFlag)
+		err := router.UpdateHostsFile(hostsIpFlag)
+		if err != nil {
+			fmt.Printf("\nError: %v\n", err)
+			fmt.Println("Please run this command with administrator privileges:")
+			fmt.Printf("  sudo piman router hosts setup --ip %s\n\n", hostsIpFlag)
+			return err
+		}
+		fmt.Println("Successfully updated system hosts file!")
+		return nil
+	},
+}
+
 func init() {
 	routerCmd.AddCommand(routerStartCmd)
 	routerCmd.AddCommand(routerStopCmd)
 	routerCmd.AddCommand(routerReloadCmd)
 	routerCmd.AddCommand(routerStatusCmd)
+
+	routerHostsCmd.PersistentFlags().StringVar(&hostsIpFlag, "ip", "127.0.0.1", "IP address the domains should resolve to")
+	routerHostsCmd.AddCommand(routerHostsPrintCmd)
+	routerHostsCmd.AddCommand(routerHostsSetupCmd)
+	routerCmd.AddCommand(routerHostsCmd)
+
 	rootCmd.AddCommand(routerCmd)
 }
+

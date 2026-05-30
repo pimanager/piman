@@ -193,11 +193,7 @@
       -webkit-text-fill-color: transparent;
     }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.25rem;
-      }
-    }
+    /* Responsive styles consolidated below */
 
     .lead {
       font-size: 1.125rem;
@@ -245,12 +241,14 @@
     .command-box {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 0.85rem 1.25rem;
       gap: 1rem;
       backdrop-filter: blur(10px);
+      max-width: 100%;
     }
 
     .command-text {
@@ -259,6 +257,13 @@
       color: var(--command-text-color);
       letter-spacing: -0.01em;
       user-select: all;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+
+    .command-text::-webkit-scrollbar {
+      display: none;
     }
 
     .btn-copy {
@@ -353,6 +358,50 @@
       color: var(--text-main);
       text-decoration: underline;
     }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 600px) {
+      header {
+        padding: 1.5rem 1rem;
+      }
+      .github-btn span,
+      .discord-btn span {
+        display: none;
+      }
+      main {
+        padding: 2rem 1rem;
+      }
+      h1 {
+        font-size: 2.15rem;
+        line-height: 1.2;
+      }
+      .lead {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+      }
+      .installer-row {
+        padding: 0 0.5rem;
+        margin-bottom: 3rem;
+      }
+      .command-box {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+      }
+      .command-text {
+        font-size: 0.75rem;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .feature-card {
+        padding: 1.25rem;
+      }
+      footer {
+        padding: 2rem 1rem;
+      }
+    }
   </style>
 </head>
 
@@ -380,11 +429,11 @@
       <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
         <i data-lucide="sun" id="theme-icon" style="width: 18px; height: 18px; stroke-width: 2px;"></i>
       </button>
-      <a href="https://discord.gg/hsxUgE2MZ" class="discord-btn" target="_blank">
+      <a href="https://discord.gg/hsxUgE2MZ" class="discord-btn" target="_blank" title="Discord Server" aria-label="Discord Server">
         <i data-lucide="message-square"></i>
         <span>Discord</span>
       </a>
-      <a href="https://github.com/pimanager/piman" class="github-btn" target="_blank">
+      <a href="https://github.com/pimanager/piman" class="github-btn" target="_blank" title="GitHub Repository" aria-label="GitHub Repository">
         <i data-lucide="github"></i>
         <span>GitHub</span>
       </a>
