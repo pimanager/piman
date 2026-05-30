@@ -21,20 +21,25 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
+      - name: Install Cross-Compilers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
+
       - name: Build Binaries
         run: |
           mkdir -p dist
           
           # Linux AMD64
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/piman main.go
+          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/piman main.go
           tar -czf dist/piman-linux-amd64.tar.gz -C dist piman
           
           # Linux ARM64 (Pi 4/5 64-bit)
-          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/piman main.go
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -ldflags="-s -w" -o dist/piman main.go
           tar -czf dist/piman-linux-arm64.tar.gz -C dist piman
           
           # Linux ARMv7 (Pi 3/4 32-bit)
-          GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w" -o dist/piman main.go
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 CC=arm-linux-gnueabihf-gcc go build -ldflags="-s -w" -o dist/piman main.go
           tar -czf dist/piman-linux-armv7.tar.gz -C dist piman
 
       - name: Create Release
@@ -46,3 +51,4 @@ jobs:
             dist/piman-linux-armv7.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
